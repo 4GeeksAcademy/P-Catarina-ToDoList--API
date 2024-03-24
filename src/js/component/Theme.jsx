@@ -9,10 +9,9 @@ function Theme() {
 
     return(
         <>
-            <h3 className="float-end m-3"
-            onClick={changeTheme}>
-                {/*change theme icon*/}
-                <i class="fas fa-adjust"></i>
+            <h3 onClick={changeTheme}>
+                {/*theme icon*/}
+                <i className="fas fa-adjust"></i>
                 {/*theme - conditional rendering*/}
                 { darkMode === true
                 ? document.querySelector("body").setAttribute("data-bs-theme", "dark")
