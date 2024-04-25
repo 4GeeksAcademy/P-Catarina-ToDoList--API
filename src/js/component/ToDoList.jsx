@@ -4,22 +4,22 @@ import Theme from "./Theme";
 
 
 function ToDoList() {
-  const [task, setTask] = useState("");
-  const [list, setList] = useState([]);
-  const [user, setUser] = useState("");
-  const [login, setLogin] = useState(false);
+  const [task, setTask] = useState("")
+  const [list, setList] = useState([])
+  const [user, setUser] = useState("")
+  const [login, setLogin] = useState(false)
 
   //task functions
   function taskInputChange(event) {
-    setTask(event.target.value);
+    setTask(event.target.value)
   }
 
   function addTask() {
-    const newTask = [...list, { done: false, label: task}];
+    const newTask = { "is_done": false, "label": task }
 
     if(task !== '') {
-        fetch(`https://playground.4geeks.com/apis/fake/todos/user/${user}`, {
-            method: 'PUT',
+        fetch(`https://playground.4geeks.com/todo/todos/${user}`, {
+            method: 'POST',
             body: JSON.stringify(newTask),
             headers: {
               "Content-Type": "application/json"
@@ -28,7 +28,7 @@ function ToDoList() {
                 if(response.ok) return response.json()
                 throw Error(response.status + "! Something Went Wrong")
             }).then(() => {
-                fetchUserList();
+                fetchUserList()
                 setTask("")
             }).catch(err => {
                 console.log('Error', err);
@@ -39,12 +39,12 @@ function ToDoList() {
 
   //user functions
   function userInputChange(event) {
-    setUser(event.target.value);
+    setUser(event.target.value)
   }
 
   function fetchUserList() {
     if(user !== "") {
-        fetch(`https://playground.4geeks.com/apis/fake/todos/user/${user}`, {
+        fetch(`https://playground.4geeks.com/todo/users/${user}`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json"
@@ -53,10 +53,9 @@ function ToDoList() {
             if(response.ok) {
                 return response.json()
             }
-            if(response.status === 404) createUser();
-            throw Error(response.status)
-        }).then((userList) => {
-            setList(userList);
+            if(response.status === 404) createUser()
+        }).then((user) => {
+            setList(user.todos)
             setLogin(true)
         }).catch(err => {
             console.log(err);
@@ -66,7 +65,7 @@ function ToDoList() {
   }
 
   function createUser() {
-      fetch(`https://playground.4geeks.com/apis/fake/todos/user/${user}`, {
+      fetch(`https://playground.4geeks.com/todo/users/${user}`, {
           method: 'POST',
           body: JSON.stringify([]),
           headers: {
@@ -83,23 +82,29 @@ function ToDoList() {
   }
 
   function removeUser() {
-          fetch(`https://playground.4geeks.com/apis/fake/todos/user/${user}`, {
+          fetch(`https://playground.4geeks.com/todo/users/${user}`, {
               method: 'DELETE',
               headers: {
                   "Content-Type": "application/json"
               }
           }).then(response => {
-              if(response.ok) return response.json()
-              throw Error(response.status)
-          }).then(() => {
-              setUser("")
-              setList([])
-              setTask("")
-              setLogin(false)
-              alert("We hate to see you leave 😢")
-          }).catch(err => {
-              console.log(err);
+              if(response.ok) {
+                setUser("")
+                setList([])
+                setTask("")
+                setLogin(false)
+                alert("We hate to see you leave 😢")
+          }}).catch(err => {
+              console.log(err)
           })
+  }
+
+  function logOut() {
+    setUser("")
+    setList([])
+    setTask("")
+    setLogin(false)
+    alert("See you later alligator 🐊")
   }
 
   return (
@@ -107,11 +112,15 @@ function ToDoList() {
       <div className="d-flex justify-content-between m-3">
         {/*user*/}
         <div className="card col-lg-2 d-flex">
-          <div className="card-header bg-warning text-light">
-            { user === ""
+          <div className="card-header d-flex justify-content-evenly bg-warning text-light">
+            { login === false
               ? <h3><i className="fas fa-user"></i></h3>
               : <h3 onClick={removeUser}><i className="fas fa-user-slash"></i></h3>
             }
+            { login === false
+              ? null
+              : <h3 onClick={logOut}><i className="fas fa-sign-out-alt"></i></h3>
+            } 
           </div>
           <input
             type="text"
@@ -145,7 +154,7 @@ function ToDoList() {
       }
       {/*task card list*/}
       <div className="d-lg-flex flex-wrap justify-content-center">
-        <Card list={list} user={user} fetch={fetchUserList} />
+        <Card list={list} fetch={fetchUserList} />
       </div>
     </>
   );
